@@ -3,21 +3,75 @@ const db = require("../db");
 const axios = require('axios');
 const ltReq = require('../config/http.config')
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
-const { get } = require("http");
+const { CloudSchedulerClient } = require('@google-cloud/scheduler');
+const { Date } = require('luxon');
 
 const get_password = async (secretName) => {
-    try {
-        const client = new SecretManagerServiceClient();
-        const path = client.secretVersionPath(config.projectId, "LTPassWord", secretName);
-        const [version] = await client.accessSecretVersion({ name: path });
-        const payload = version.payload.data.toString('utf8');
+    const client = new SecretManagerServiceClient();
+    const path = client.secretVersionPath(config.projectId, "LTPassWord", secretName);
+    const [version] = await client.accessSecretVersion({ name: path });
+    const payload = version.payload.data.toString('utf8');
+
+    return payload;
+}
+
+const time_conversion = (dateString, estTime) => {
+    const estDateTime = Date.fromISO(`${dateString}T${estTime}`, { zone: 'America/New_York' });
+    const utcDateTime = estDateTime.toUTC();
+    const adjustedUtcDateTime = utcDateTime.minus({ minutes: 1 });
+    const formattedUtcDate = adjustedUtcDateTime.toFormat('MM-DD');
+    const formattedUtcTime = adjustedUtcDateTime.toFormat('HH:mm');
     
-        return payload;
-      } catch (error) {
-        console.error('Error accessing secret:', error);
-        res.status(500).send({ message: "Internal Error" });
-        return;
+    return {formattedUtcTime, formattedUtcDate};
+
+}
+
+// TODO Change out URLS for project and switch service account
+const create_cloud_schedule = async (event_id, date, time, member_id, email) => {
+    let { utcTime, utcDate} = time_conversion(date, time);
+    utcTime = utcTime.split(":");
+    utcDate = utcDate.split("-")
+    const location = 'us-central1';
+    const job = {
+        name: event_id + member_id,
+        description: `Generated event for ${email}`,
+        schedule: `${utcTime[1]} ${utcTime[0]} ${utcDate[1]} ${utcDate[0]} *`, 
+        httpTarget: {
+          uri: 'https://us-central1-ltclassbot.cloudfunctions.net/LTClassReserver',
+          httpMethod: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Google-Cloud-Scheduler'
+          },
+          body: {"event_id": event_id,"trigger_time":time, "member_id": member_id, "username": email},
+          oidcToken: {
+            serviceAccountEmail: 'ltclassbot@appspot.gserviceaccount.com',
+            audience: 'https://us-central1-ltclassbot.cloudfunctions.net/LTClassReserver', 
+          }
+        },
     }
+
+    const [response] = await client.createJob({
+            parent: client.locationPath(projectId, location),
+            job: job,
+          });
+
+    return response
+}
+
+const add_user_fb = async (email, event) => {
+    const user = db.collection('users').doc(email).collection('events').doc(event.event_id);
+    
+    const res = await user.update({
+        'name': event.name,
+        'start': event.start,
+        'end': event.end,
+        'location': event.location,
+        'status': 'pending'
+    })
+
+    return res;
+    
 }
 
 const gen_url = () => {
@@ -122,6 +176,18 @@ exports.userEvents = async (req, res) => {
 }
 exports.addEvent = async (req, res) => {
     try {
+        if (req.body.email && req.body.event && req.body.member_id) {
+            const event = req.body.event
+            const create_job_res = await create_cloud_schedule(event.event_id, event.start, req.body.member_id, req.body.email);
+            console.log(create_job_res);
+            const res = await add_user_fb(req.body.email, event);
+            res.status(201).send({message: "Successfully Created job"});
+            return;
+        }
+        else {
+            res.status(400).send({message: "Missing part or all of Payload"});
+            return;
+        }
         
     }
     catch (error) {

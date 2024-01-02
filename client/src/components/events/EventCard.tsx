@@ -57,12 +57,17 @@ const EventCard = ({event_obj, start_time} : Props) => {
         return parsed_text
     }
 
+    const finishRes = async () => {
+        const res = 0;
+    }
+
     return (
     <div className="event-card event-card-align" onClick={() => setShowButton(!showButton)}>
         <h6>{showButton ?  event_obj.name : textParse(event_obj.name)}</h6>
         {event_obj.paid ? <h6>EXTRA COST $$$</h6> : <></>}
         <p className='time'>{start_time} - {event_obj.end}</p>
         <p className='location'>{showButton ? event_obj.location : event_obj.location.split(",")[1]}</p>
+        {showButton ? <button onClick={finishRes}>Schedule Booking</button> : <></>}
     </div>
   )
 }

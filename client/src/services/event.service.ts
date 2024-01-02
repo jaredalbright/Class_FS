@@ -3,10 +3,8 @@ import {authHeader, authHeader_LT} from './auth.header';
 
 const API_URL = 'http://localhost:8000/api/events/';
 
-interface authProps {
-  email: string
-}
-export const auth = ({email} : authProps) => {
+// TODO ADD CHECK FOR AUTH EXP
+export const auth = (email : string) => {
     const data = {"email": email};
     return axios.post(API_URL + 'auth', data, { headers: authHeader()})
     .then((response) => {
@@ -46,4 +44,18 @@ export const getCurrentEvents = () => {
 
 export const removeEvents = () => {
   localStorage.removeItem("events");
+}
+
+// TODO MAKE SURE DATE IS GOINGIN
+export const makeRes = () => {
+  console.log(authHeader_LT())
+  return axios.post(API_URL + 'addUserEvent', { headers: authHeader_LT() 
+  })
+    .then((response) => {
+      if (response.data.classes) {
+        localStorage.setItem("events", JSON.stringify(response.data));
+      }
+
+      return response.data
+    });
 }

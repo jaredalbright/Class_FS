@@ -1,5 +1,6 @@
 import axios from "axios";
 import { removeEvents } from "./event.service";
+import { auth } from "./event.service";
 
 
 const API_URL = "http://localhost:8000/api/auth/";
@@ -20,6 +21,7 @@ export const login = (email: string, password: string) => {
     .then((response) => {
       if (response.data.accessToken) {
         localStorage.setItem("user", JSON.stringify(response.data));
+        auth(email);
       }
 
       return response.data;

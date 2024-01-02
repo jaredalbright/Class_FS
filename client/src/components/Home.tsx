@@ -29,9 +29,6 @@ const Home = () : JSX.Element => {
             if (user.x_ltf_profile && user.x_ltf_ssoid) {
                 getEvents();
             }
-            else {
-                auth({email: user.email});
-            }
         }
 
     }, [])
