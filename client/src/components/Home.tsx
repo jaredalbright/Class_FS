@@ -18,25 +18,49 @@ const Home = () : JSX.Element => {
         return <Navigate to="/login" />
     }
 
+    const set_events_fresh = async () => {
+        await getEvents();
+        setCurrentEvents(getCurrentEvents());
+
+    }
+
+    const check_refresh_date = (events : any) => {
+        const first_day = Object.keys(events.classes)[0];
+        const first_day_day = first_day.split('-')[2];
+
+        const today = new Date();
+        const one_week = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const one_week_s = one_week.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).split('/');
+        
+        if (parseInt(first_day_day) < parseInt(one_week_s[1])) {
+            console.log(`Refreshing since starting day: ${first_day_day} is outdated`);
+            return false;
+        }
+
+        return true;
+    }
+
     useEffect(() => {
         const events = getCurrentEvents();
-        console.log("take1")
-        if (events) {
+
+        if (events && check_refresh_date(events)) {
             setCurrentEvents(events);
         }
         else {
             const user = getCurrentUser();
+            console.log(user);
             if (user.x_ltf_profile && user.x_ltf_ssoid) {
-                getEvents();
+                set_events_fresh();
             }
         }
 
     }, [])
 
-    console.log(currentEvents);
     return (
         <div>
-        {currentEvents ? <Events event_obj={currentEvents.classes}/> : <h3> Loading</h3> } 
+            <h2>Scheduled Events</h2>
+            <h2>Next Weeks Events</h2>
+            {currentEvents ? <Events event_obj={currentEvents.classes}/> : <h3> Loading</h3> } 
         </div>
     );
 }

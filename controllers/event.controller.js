@@ -4,7 +4,7 @@ const axios = require('axios');
 const ltReq = require('../config/http.config')
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const { CloudSchedulerClient } = require('@google-cloud/scheduler');
-const { Date } = require('luxon');
+//import { Date as LXDate } from 'luxon';
 
 const get_password = async (secretName) => {
     const client = new SecretManagerServiceClient();
@@ -16,7 +16,7 @@ const get_password = async (secretName) => {
 }
 
 const time_conversion = (dateString, estTime) => {
-    const estDateTime = Date.fromISO(`${dateString}T${estTime}`, { zone: 'America/New_York' });
+    const estDateTime = LXDate.fromISO(`${dateString}T${estTime}`, { zone: 'America/New_York' });
     const utcDateTime = estDateTime.toUTC();
     const adjustedUtcDateTime = utcDateTime.minus({ minutes: 1 });
     const formattedUtcDate = adjustedUtcDateTime.toFormat('MM-DD');
@@ -31,13 +31,13 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
     let { utcTime, utcDate} = time_conversion(date, time);
     utcTime = utcTime.split(":");
     utcDate = utcDate.split("-")
-    const location = 'us-central1';
+    const location = config.functionRegion;
     const job = {
         name: event_id + member_id,
         description: `Generated event for ${email}`,
         schedule: `${utcTime[1]} ${utcTime[0]} ${utcDate[1]} ${utcDate[0]} *`, 
         httpTarget: {
-          uri: 'https://us-central1-ltclassbot.cloudfunctions.net/LTClassReserver',
+          uri: config.functionURL,
           httpMethod: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,8 +45,8 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
           },
           body: {"event_id": event_id,"trigger_time":time, "member_id": member_id, "username": email},
           oidcToken: {
-            serviceAccountEmail: 'ltclassbot@appspot.gserviceaccount.com',
-            audience: 'https://us-central1-ltclassbot.cloudfunctions.net/LTClassReserver', 
+            serviceAccountEmail: config.functionEmail,
+            audience: config.functionURL, 
           }
         },
     }
@@ -76,10 +76,11 @@ const add_user_fb = async (email, event) => {
 
 const gen_url = () => {
     const today = new Date();
+    const one_week = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
     const two_weeks = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
-    const todayFormatted = today.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).split('/');
+    const oneWeekFormatted = one_week.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).split('/');
     const twoWeeksFormatted = two_weeks.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).split('/');
-    const url = `/ux/web-schedules/v2/schedules/classes?start=${todayFormatted[0]}%2F${todayFormatted[1]}%2F${todayFormatted[2]}&end=${twoWeeksFormatted[0]}%2F${twoWeeksFormatted[1]}%2F${twoWeeksFormatted[2]}&tags=format%3AClass&locations=Sky%20(Manhattan)&isFree=false&isLiveStreaming=false&facet=tags%3Ainterest%2Ctags%3AdepartmentDescription%2Ctags%3AtimeOfDay%2Ctags%3Aage%2Ctags%3AskillLevel%2Ctags%3Aintensity%2Cleader.name.displayname%2Clocation.name%2Ctags%3Aresource&page=1&pageSize=750&tags=interest:Pickleball`;
+    const url = `/ux/web-schedules/v2/schedules/classes?start=${oneWeekFormatted[0]}%2F${oneWeekFormatted[1]}%2F${oneWeekFormatted[2]}&end=${twoWeeksFormatted[0]}%2F${twoWeeksFormatted[1]}%2F${twoWeeksFormatted[2]}&tags=format%3AClass&locations=Sky%20(Manhattan)&isFree=false&isLiveStreaming=false&facet=tags%3Ainterest%2Ctags%3AdepartmentDescription%2Ctags%3AtimeOfDay%2Ctags%3Aage%2Ctags%3AskillLevel%2Ctags%3Aintensity%2Cleader.name.displayname%2Clocation.name%2Ctags%3Aresource&page=1&pageSize=750&tags=interest:Pickleball`;
     return url;
 }
 

@@ -45,6 +45,17 @@ export const getCurrentEvents = () => {
 export const removeEvents = () => {
   localStorage.removeItem("events");
 }
+interface EventObj {
+  name: string,
+  event_id: string,
+  end: string,
+  location: string,
+  paid: boolean
+}
+export const addUserEvent = (event: EventObj, email: String, memberID: Array<number>) => {
+
+  localStorage.removeItem("events");
+}
 
 // TODO MAKE SURE DATE IS GOINGIN
 export const makeRes = () => {

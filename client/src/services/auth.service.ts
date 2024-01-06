@@ -12,20 +12,18 @@ export const register = (email: string, password: string) => {
   });
 };
 
-export const login = (email: string, password: string) => {
-  return axios
-    .post(API_URL + "signin", {
+export const login = async (email: string, password: string) => {
+  const response = await axios.post(API_URL + "signin", {
       email,
       password,
     })
-    .then((response) => {
-      if (response.data.accessToken) {
-        localStorage.setItem("user", JSON.stringify(response.data));
-        auth(email);
-      }
 
-      return response.data;
-    });
+    if (response.data.accessToken) {
+      localStorage.setItem("user", JSON.stringify(response.data));
+      const res = await auth(email);
+
+      return res.data;
+    }
 };
 
 export const logout = () => {

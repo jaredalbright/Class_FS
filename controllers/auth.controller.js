@@ -51,7 +51,8 @@ exports.auth = async (req, res) => {
             console.log(`${req.body.email} successful Auth`);
             res.status(200).send({
                 email: req.body.email,
-                accessToken: token
+                accessToken: token,
+                otherMembers: data.other_members
             })
 
 
