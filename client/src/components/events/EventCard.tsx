@@ -2,18 +2,21 @@ import { ChangeEvent, useEffect, useState } from "react";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { getCurrentUser } from './../../services/auth.service';
+import { addUserEvent } from "../../services/event.service";
 
 interface EventObj {
     name: string,
     event_id: string,
     end: string,
     location: string,
-    paid: boolean
+    paid: boolean,
+    day: string
 }
 
 interface Props {
     event_obj: EventObj,
-    start_time: string
+    start_time: string,
+    e_date: string
 }
 
 interface Member {
@@ -21,7 +24,7 @@ interface Member {
     id: number
 }
 
-const EventCard = ({ event_obj, start_time }: Props) => {
+const EventCard = ({ event_obj, start_time, e_date }: Props) => {
     const [showButton, setShowButton] = useState<boolean>(false);
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
     const [otherMembers, setOtherMembers] = useState<Member[] | undefined>(undefined);
@@ -86,7 +89,13 @@ const EventCard = ({ event_obj, start_time }: Props) => {
 
     const confirm = () => {
         console.log(confirmedMembers);
-
+        console.log(e_date)
+        let member_ids = confirmedMembers;
+        const user = getCurrentUser();
+        console.log(user);
+        member_ids.push(user.memberId)
+        
+        const res = addUserEvent(event_obj, start_time, e_date, user.email, member_ids);
         setShowConfirm(false);
     }
 

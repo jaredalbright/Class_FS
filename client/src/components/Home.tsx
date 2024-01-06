@@ -21,7 +21,6 @@ const Home = () : JSX.Element => {
     const set_events_fresh = async () => {
         await getEvents();
         setCurrentEvents(getCurrentEvents());
-
     }
 
     const check_refresh_date = (events : any) => {
@@ -53,7 +52,7 @@ const Home = () : JSX.Element => {
                 set_events_fresh();
             }
         }
-
+        
     }, [])
 
     return (

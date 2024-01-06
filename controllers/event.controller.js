@@ -4,7 +4,6 @@ const axios = require('axios');
 const ltReq = require('../config/http.config')
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const { CloudSchedulerClient } = require('@google-cloud/scheduler');
-//import { Date as LXDate } from 'luxon';
 
 const get_password = async (secretName) => {
     const client = new SecretManagerServiceClient();
@@ -16,26 +15,55 @@ const get_password = async (secretName) => {
 }
 
 const time_conversion = (dateString, estTime) => {
-    const estDateTime = LXDate.fromISO(`${dateString}T${estTime}`, { zone: 'America/New_York' });
-    const utcDateTime = estDateTime.toUTC();
-    const adjustedUtcDateTime = utcDateTime.minus({ minutes: 1 });
-    const formattedUtcDate = adjustedUtcDateTime.toFormat('MM-DD');
-    const formattedUtcTime = adjustedUtcDateTime.toFormat('HH:mm');
-    
-    return {formattedUtcTime, formattedUtcDate};
+    // Construct EST date object
+    const estDateParts = dateString.split("-");
+    const estTimeParts = estTime.split(":");
+    const estDateTime = new Date(
+      Date.UTC(
+        parseInt(estDateParts[0]), // Year
+        parseInt(estDateParts[1]) - 1, // Month (0-indexed)
+        parseInt(estDateParts[2]), // Day
+        parseInt(estTimeParts[0]), // Hour
+        parseInt(estTimeParts[1])
+      )
+    );
+  
+    // Subtract 1 minute for adjustment
+    const adjustedUtcDateTime = new Date(estDateTime.getTime() - 60000);
+  
+    // Format UTC date and time using 24-hour format
+    const formattedUtcDate = new Intl.DateTimeFormat("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+    }).format(adjustedUtcDateTime);
+    const formattedUtcTime = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h24", // Use 24-hour clock format
+      timeZone: "UTC", // Ensure UTC formatting
+    }).format(adjustedUtcDateTime);
 
-}
+    console.log(formattedUtcTime, formattedUtcDate)
+  
+    return { formattedUtcTime, formattedUtcDate };
+  };
 
 // TODO Change out URLS for project and switch service account
 const create_cloud_schedule = async (event_id, date, time, member_id, email) => {
-    let { utcTime, utcDate} = time_conversion(date, time);
-    utcTime = utcTime.split(":");
-    utcDate = utcDate.split("-")
+    let time_date = await time_conversion(date, time);
+    let utcTime = time_date.formattedUtcTime.split(":");
+    let utcDate = time_date.formattedUtcDate.split("/");
+    console.log(utcDate, utcTime);
     const location = config.functionRegion;
+
+    const client = new CloudSchedulerClient();
+    const parent = client.locationPath(config.projectId, location);
     const job = {
-        name: event_id + member_id,
+        name: parent + "/jobs/" + event_id + "_" + email.split("@")[0],
         description: `Generated event for ${email}`,
-        schedule: `${utcTime[1]} ${utcTime[0]} ${utcDate[1]} ${utcDate[0]} *`, 
+        schedule: `${utcTime[1]} ${utcTime[0]} ${utcDate[1]} ${utcDate[0]} *`,
+        timeZone: 'UTC', 
+        target: 'httpTarget',
         httpTarget: {
           uri: config.functionURL,
           httpMethod: 'POST',
@@ -43,7 +71,7 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
             'Content-Type': 'application/json',
             'User-Agent': 'Google-Cloud-Scheduler'
           },
-          body: {"event_id": event_id,"trigger_time":time, "member_id": member_id, "username": email},
+          body: Buffer.from(JSON.stringify({"event_id": event_id,"trigger_time":time, "member_id": member_id, "username": email})),
           oidcToken: {
             serviceAccountEmail: config.functionEmail,
             audience: config.functionURL, 
@@ -52,7 +80,7 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
     }
 
     const [response] = await client.createJob({
-            parent: client.locationPath(projectId, location),
+            parent: parent,
             job: job,
           });
 
@@ -101,7 +129,7 @@ const format_res_data = (full_res) => {
                         "location": event.location,
                         "paid": event.isPaidClass,
                         "start": time.time,
-                        "end": event.endTime
+                        "end": event.endTime,
                     });
                 };
                 date_obj[actObj.time] = time_arr;
@@ -177,11 +205,12 @@ exports.userEvents = async (req, res) => {
 }
 exports.addEvent = async (req, res) => {
     try {
-        if (req.body.email && req.body.event && req.body.member_id) {
+        if (req.body.email && req.body.event && req.body.start && req.body.member_id && req.body.date) {
             const event = req.body.event
-            const create_job_res = await create_cloud_schedule(event.event_id, event.start, req.body.member_id, req.body.email);
+            const create_job_res = await create_cloud_schedule(event.event_id, req.body.date, req.body.start, req.body.member_id, req.body.email);
             console.log(create_job_res);
-            const res = await add_user_fb(req.body.email, event);
+            const response = await add_user_fb(req.body.email, event);
+            console.log(response);
             res.status(201).send({message: "Successfully Created job"});
             return;
         }

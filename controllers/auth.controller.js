@@ -52,6 +52,7 @@ exports.auth = async (req, res) => {
             res.status(200).send({
                 email: req.body.email,
                 accessToken: token,
+                memberId: data.memberId,
                 otherMembers: data.other_members
             })
 

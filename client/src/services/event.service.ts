@@ -52,21 +52,39 @@ interface EventObj {
   location: string,
   paid: boolean
 }
-export const addUserEvent = (event: EventObj, email: String, memberID: Array<number>) => {
 
-  localStorage.removeItem("events");
+export const addUserEvent = async (event: EventObj, start: String, date: String, email: String, memberID: Array<number>) => {
+  const response = await axios.post(API_URL + "addUserEvent", {
+    email: email,
+    event: event,
+    member_id: memberID,
+    start: start,
+    date: date
+  },   
+  { headers: authHeader_LT()})
+  if (response.status == 201) {
+    console.log("success");
+  }
+  else {
+    return false;
+  }
 }
 
 // TODO MAKE SURE DATE IS GOINGIN
-export const makeRes = () => {
-  console.log(authHeader_LT())
-  return axios.post(API_URL + 'addUserEvent', { headers: authHeader_LT() 
-  })
-    .then((response) => {
-      if (response.data.classes) {
-        localStorage.setItem("events", JSON.stringify(response.data));
-      }
+// export const makeRes = () => {
+//   console.log(authHeader_LT())
+//   return axios.post(API_URL + 'addUserEvent', {
+//     email: email,
+//     event: event,
+//     member_id: memberID
+//   },
+//   { headers: authHeader_LT() 
+//   })
+//     .then((response) => {
+//       if (response.data.classes) {
+//         localStorage.setItem("events", JSON.stringify(response.data));
+//       }
 
-      return response.data
-    });
-}
+//       return response.data
+//     });
+// }
