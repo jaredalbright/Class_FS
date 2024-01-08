@@ -18,34 +18,53 @@ const time_conversion = (dateString, estTime) => {
     // Construct EST date object
     const estDateParts = dateString.split("-");
     const estTimeParts = estTime.split(":");
+
+    const isPM = estTimeParts[1].includes("PM");
+
+    const estDay = parseInt(estDateParts[2]) - 7;
+    const estMonth = parseInt(estDateParts[1]) - 1;
+    const estYear = parseInt(estDateParts[0]);
+
+    const isDstObserved = (
+        (estMonth >= 3 && estMonth < 11) || // March to November (inclusive)
+        (estMonth === 2 && estDay >= (14 - (estYear % 7))) || // Second Sunday of March
+        (estMonth === 10 && estDay >= (7 - (estYear % 7))) // First Sunday of November
+    );
+
+    let estHour = parseInt(estTimeParts[0]) + (isPM ? 12 : 0) + (isDstObserved ? 4 : 5);
+    const estMin = parseInt(estTimeParts[1]) - 1;
+    const target = `${estHour}:${parseInt(estTimeParts[1])}`
+
+    if (estMin == 59) {
+        estHour -= 1;
+    }
+
+
     const estDateTime = new Date(
       Date.UTC(
-        parseInt(estDateParts[0]), // Year
-        parseInt(estDateParts[1]) - 1, // Month (0-indexed)
-        parseInt(estDateParts[2]), // Day
-        parseInt(estTimeParts[0]), // Hour
-        parseInt(estTimeParts[1])
+        estYear, // Year
+        estMonth, // Month (0-indexed)
+        estDay, // Day
+        estHour, // Hour
+        estMin
       )
     );
-  
-    // Subtract 1 minute for adjustment
-    const adjustedUtcDateTime = new Date(estDateTime.getTime() - 60000);
-  
+
     // Format UTC date and time using 24-hour format
     const formattedUtcDate = new Intl.DateTimeFormat("en-US", {
       month: "2-digit",
       day: "2-digit",
-    }).format(adjustedUtcDateTime);
+    }).format(estDateTime);
     const formattedUtcTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hourCycle: "h24", // Use 24-hour clock format
       timeZone: "UTC", // Ensure UTC formatting
-    }).format(adjustedUtcDateTime);
+    }).format(estDateTime);
 
     console.log(formattedUtcTime, formattedUtcDate)
   
-    return { formattedUtcTime, formattedUtcDate };
+    return { formattedUtcTime, formattedUtcDate, target };
   };
 
 // TODO Change out URLS for project and switch service account
@@ -71,7 +90,7 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
             'Content-Type': 'application/json',
             'User-Agent': 'Google-Cloud-Scheduler'
           },
-          body: Buffer.from(JSON.stringify({"event_id": event_id,"trigger_time":time, "member_id": member_id, "username": email})),
+          body: Buffer.from(JSON.stringify({"event_id": event_id,"trigger_time":time_date.target, "member_id": member_id, "username": email})),
           oidcToken: {
             serviceAccountEmail: config.functionEmail,
             audience: config.functionURL, 
