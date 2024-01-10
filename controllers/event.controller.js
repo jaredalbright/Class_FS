@@ -66,8 +66,6 @@ const time_conversion = (dateString, estTime) => {
       hourCycle: "h24", // Use 24-hour clock format
       timeZone: "UTC", // Ensure UTC formatting
     }).format(utcTriggerTime);
-
-    console.log(formattedUtcTime, formattedUtcDate)
   
     return { formattedUtcTime, formattedUtcDate, target };
   };
@@ -77,7 +75,6 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
     let time_date = await time_conversion(date, time);
     let utcTime = time_date.formattedUtcTime.split(":");
     let utcDate = time_date.formattedUtcDate.split("/");
-    console.log(utcDate, utcTime);
     const location = config.functionRegion;
 
     const client = new CloudSchedulerClient();
@@ -103,26 +100,42 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
         },
     }
 
-    const [response] = await client.createJob({
-            parent: parent,
-            job: job,
-          });
-
-    return response
+    try {
+        const [response] = await client.createJob({
+                parent: parent,
+                job: job,
+            });
+        return true
+    }
+    catch {
+        console.log("Failure due to Scheduler");
+        return false
+    }
 }
 
-const add_user_fb = async (email, event) => {
+const add_user_fb = async (email, event, start, member_id) => {
     const user = db.collection('users').doc(email).collection('events').doc(event.event_id);
     
-    const res = await user.update({
-        'name': event.name,
-        'start': event.start,
-        'end': event.end,
-        'location': event.location,
-        'status': 'pending'
-    })
+    const doc = await(user.get());
+    if (doc.exists) {
+        console.log("Event Already Created for User");
+        return false
+    }
 
-    return res;
+    try {
+        await user.set({
+            name: event.name,
+            start: start,
+            end: event.end,
+            location: event.location,
+            member_id: member_id,
+            status: 'pending'
+            })
+        return true;
+    }
+    catch {
+        return false
+    }
     
 }
 
@@ -233,9 +246,17 @@ exports.addEvent = async (req, res) => {
             const event = req.body.event
             const create_job_res = await create_cloud_schedule(event.event_id, req.body.date, req.body.start, req.body.member_id, req.body.email);
             console.log(create_job_res);
-            const response = await add_user_fb(req.body.email, event);
-            console.log(response);
-            res.status(201).send({message: "Successfully Created job"});
+            if (!create_job_res) {
+                res.status(400).send({message: "Unable to Create Schedule: Could Be Duplicate"});
+                return
+            }
+            const response = await add_user_fb(req.body.email, event, req.body.start, req.body.member_id);
+            if (response) {
+                res.status(201).send({message: "Successfully Created job"});
+            }
+            else {
+                res.status(400).send({message: "Cannot Add to Database due to Firebase Error"});
+            }
             return;
         }
         else {

@@ -54,20 +54,45 @@ interface EventObj {
 }
 
 export const addUserEvent = async (event: EventObj, start: String, date: String, email: String, memberID: Array<number>) => {
-  const response = await axios.post(API_URL + "addUserEvent", {
+  const payload = {
     email: email,
     event: event,
     member_id: memberID,
     start: start,
     date: date
-  },   
-  { headers: authHeader_LT()})
-  if (response.status == 201) {
+  }
+  // const response = await axios.post(API_URL + "addUserEvent", payload,   
+  // { headers: authHeader_LT()})
+  if (true) {
     console.log("success");
+    const eventStr = localStorage.getItem("events");
+    if (eventStr) {
+      let events = JSON.parse(eventStr);
+      console.log(events.date);
+      let event_arr = events.date.start;
+      event_arr = event_arr.filter((e : any) => (e.event_id == event.event_id))
+      events.date.start = event_arr
+      localStorage.setItem("events", JSON.stringify(events));
+
+      const userEventStr = localStorage.getItem("user_events");
+      if (userEventStr) {
+        let userEvents = JSON.parse(userEventStr);
+        let userEvents_arr = userEvents.events;
+        userEvents.events = userEvents_arr.push(payload);
+        localStorage.setItem("user_events", JSON.stringify(userEvents));
+      }
+    }
   }
   else {
     return false;
   }
+}
+
+export const getUserEvents = () => {
+  const eventStr = localStorage.getItem("user_events");
+  if (eventStr) return JSON.parse(eventStr);
+
+  return null;
 }
 
 // TODO MAKE SURE DATE IS GOINGIN

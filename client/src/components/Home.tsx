@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom'
 import IUser from '../types/user.type'
 import Events from './events/Events'
 import { getCurrentUser } from './../services/auth.service';
-import { auth, getCurrentEvents, getEvents } from '../services/event.service';
+import { auth, getCurrentEvents, getEvents, getUserEvents } from '../services/event.service';
 
 interface Event {
     classes: Object
@@ -41,7 +41,8 @@ const Home = () : JSX.Element => {
 
     useEffect(() => {
         const events = getCurrentEvents();
-
+        console.log(events)
+        console.log(getUserEvents())
         if (events && check_refresh_date(events)) {
             setCurrentEvents(events);
         }
