@@ -21,9 +21,21 @@ const time_conversion = (dateString, estTime) => {
 
     const isPM = estTimeParts[1].includes("PM");
 
-    const estDay = parseInt(estDateParts[2]) - 7;
-    const estMonth = parseInt(estDateParts[1]) - 1;
-    const estYear = parseInt(estDateParts[0]);
+    const estDateTime = new Date(
+      Date.UTC(
+        parseInt(estDateParts[0]), // Year
+        parseInt(estDateParts[1]) - 1, // Month (0-indexed)
+        parseInt(estDateParts[2]), // Day
+        (parseInt(estTimeParts[0]) + (isPM ? 12 : 0)) % 24, // Hour
+        parseInt(estTimeParts[1])
+      )
+    );
+
+    const oneWeekDateTime = new Date(estDateTime.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const estDay = oneWeekDateTime.day;
+    const estMonth = oneWeekDateTime.month;
+    const estYear = oneWeekDateTime.year;
 
     const isDstObserved = (
         (estMonth >= 3 && estMonth < 11) || // March to November (inclusive)
@@ -31,36 +43,29 @@ const time_conversion = (dateString, estTime) => {
         (estMonth === 10 && estDay >= (7 - (estYear % 7))) // First Sunday of November
     );
 
-    let estHour = parseInt(estTimeParts[0]) + (isPM ? 12 : 0) + (isDstObserved ? 4 : 5);
-    const estMin = parseInt(estTimeParts[1]) - 1;
-    const target = `${estHour}:${parseInt(estTimeParts[1])}`
+    const utcTargetTime = new Date(oneWeekDateTime.getTime() + 60 * 60 * 1000 * (isDstObserved ? 4 : 5));
 
-    if (estMin == 59) {
-        estHour -= 1;
-    }
+    // Format UTC date and time using 24-hour format
+    const target = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h24", // Use 24-hour clock format
+        timeZone: "UTC", // Ensure UTC formatting
+      }).format(utcTargetTime);
 
-
-    const estDateTime = new Date(
-      Date.UTC(
-        estYear, // Year
-        estMonth, // Month (0-indexed)
-        estDay, // Day
-        estHour, // Hour
-        estMin
-      )
-    );
+    const utcTriggerTime = new Date(utcTargetTime.getTime() - 60 * 1000);
 
     // Format UTC date and time using 24-hour format
     const formattedUtcDate = new Intl.DateTimeFormat("en-US", {
       month: "2-digit",
       day: "2-digit",
-    }).format(estDateTime);
+    }).format(utcTriggerTime);
     const formattedUtcTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hourCycle: "h24", // Use 24-hour clock format
       timeZone: "UTC", // Ensure UTC formatting
-    }).format(estDateTime);
+    }).format(utcTriggerTime);
 
     console.log(formattedUtcTime, formattedUtcDate)
   
