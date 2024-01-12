@@ -113,7 +113,7 @@ const create_cloud_schedule = async (event_id, date, time, member_id, email) => 
     }
 }
 
-const add_user_fb = async (email, event, start, member_id) => {
+const add_user_fb = async (email, event, start, member_id, date, day) => {
     const user = db.collection('users').doc(email).collection('events').doc(event.event_id);
     
     const doc = await(user.get());
@@ -129,6 +129,8 @@ const add_user_fb = async (email, event, start, member_id) => {
             end: event.end,
             location: event.location,
             member_id: member_id,
+            date: date,
+            day: day,
             status: 'pending'
             })
         return true;
@@ -231,8 +233,33 @@ exports.events = async (req, res) => {
     }
 }
 
+const format_user_res_data = (response) => {
+    const data = response.docs.map((doc) => {
+        return {id: doc.id, ...doc.data()}
+    })
+
+    const res = {}
+    for (let x in data) {
+        const event = data[x];
+        const {id, ...rest} = event;
+        if ('name' in event) {
+            res[event.id] = {...rest}
+        }
+    }
+    return res
+}
+
 exports.userEvents = async (req, res) => {
     try {
+        console.log(req.headers)
+        if (req.headers.email) {
+            console.log("SUP")
+            const user = await db.collection('users').doc(req.headers.email).collection('events').get();
+            const response = format_user_res_data(user);
+            console.log(response);
+            console.log(`Successfully retrieved User data`);
+            res.status(200).send(response);
+        }
         
     }
     catch (error) {
@@ -242,7 +269,7 @@ exports.userEvents = async (req, res) => {
 }
 exports.addEvent = async (req, res) => {
     try {
-        if (req.body.email && req.body.event && req.body.start && req.body.member_id && req.body.date) {
+        if (req.body.email && req.body.event && req.body.start && req.body.member_id && req.body.date && req.body.day) {
             const event = req.body.event
             const create_job_res = await create_cloud_schedule(event.event_id, req.body.date, req.body.start, req.body.member_id, req.body.email);
             console.log(create_job_res);
@@ -250,7 +277,7 @@ exports.addEvent = async (req, res) => {
                 res.status(400).send({message: "Unable to Create Schedule: Could Be Duplicate"});
                 return
             }
-            const response = await add_user_fb(req.body.email, event, req.body.start, req.body.member_id);
+            const response = await add_user_fb(req.body.email, event, req.body.start, req.body.member_id, req.body.date, req.body.day);
             if (response) {
                 res.status(201).send({message: "Successfully Created job"});
             }

@@ -23,7 +23,6 @@ export const auth = (email : string) => {
   }
 
 export const getEvents = () => {
-    console.log(authHeader_LT())
     return axios.get(API_URL + 'events', { headers: authHeader_LT() 
     })
       .then((response) => {
@@ -53,42 +52,58 @@ interface EventObj {
   paid: boolean
 }
 
-export const addUserEvent = async (event: EventObj, start: String, date: String, email: String, memberID: Array<number>) => {
+export const addUserEvent = async (event: EventObj, start: string, date: string, email: string, memberID: Array<number>, day: string) => {
   const payload = {
     email: email,
     event: event,
     member_id: memberID,
     start: start,
-    date: date
+    date: date,
+    day: day
   }
-  // const response = await axios.post(API_URL + "addUserEvent", payload,   
-  // { headers: authHeader_LT()})
+  const response = await axios.post(API_URL + "addUserEvent", payload,   
+  { headers: authHeader_LT()})
   if (true) {
     console.log("success");
-    const eventStr = localStorage.getItem("events");
-    if (eventStr) {
-      let events = JSON.parse(eventStr);
-      console.log(events.date);
-      let event_arr = events.date.start;
-      event_arr = event_arr.filter((e : any) => (e.event_id == event.event_id))
-      events.date.start = event_arr
-      localStorage.setItem("events", JSON.stringify(events));
+    // const eventStr = localStorage.getItem("events");
+    // if (eventStr) {
+    //   let events = JSON.parse(eventStr);
+    //   console.log(start);
+    //   console.log(events.classes[date][start]);
+    //   let event_arr = events.classes[date][start];
+    //   event_arr = event_arr.filter((e : any) => (e.event_id == event.event_id))
+    //   events.classes[date][start] = event_arr
+    //   localStorage.setItem("events", JSON.stringify(events));
 
-      const userEventStr = localStorage.getItem("user_events");
-      if (userEventStr) {
-        let userEvents = JSON.parse(userEventStr);
-        let userEvents_arr = userEvents.events;
-        userEvents.events = userEvents_arr.push(payload);
-        localStorage.setItem("user_events", JSON.stringify(userEvents));
-      }
-    }
+    //   const userEventStr = localStorage.getItem("user_events");
+    //   if (userEventStr) {
+    //     let userEvents = JSON.parse(userEventStr);
+    //     let userEvents_arr = userEvents.events;
+    //     userEvents.events = userEvents_arr.push(payload);
+    //     localStorage.setItem("user_events", JSON.stringify(userEvents));
+    //   }
+    // }
   }
   else {
     return false;
   }
 }
 
-export const getUserEvents = () => {
+export const getUserEvents = (email: string) => {
+  let headers : any = authHeader();
+  headers['email'] = email;
+  return axios.get(API_URL + 'userEvents', { headers: headers
+  })
+    .then((response) => {
+      if (response.data) {
+        localStorage.setItem("user_events", JSON.stringify(response.data));
+      }
+
+      return response.data
+    });
+}
+
+export const getCurrentUserEvents = () => {
   const eventStr = localStorage.getItem("user_events");
   if (eventStr) return JSON.parse(eventStr);
 

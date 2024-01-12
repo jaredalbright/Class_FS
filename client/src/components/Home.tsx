@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom'
 import IUser from '../types/user.type'
 import Events from './events/Events'
 import { getCurrentUser } from './../services/auth.service';
-import { auth, getCurrentEvents, getEvents, getUserEvents } from '../services/event.service';
+import { auth, getCurrentEvents, getEvents, getCurrentUserEvents, getUserEvents } from '../services/event.service';
 
 interface Event {
     classes: Object
@@ -13,6 +13,7 @@ interface Event {
 
 const Home = () : JSX.Element => {
     const [currentEvents, setCurrentEvents] = useState<Event | undefined>(undefined);
+    const [userEvents, setUserEvents] = useState<Event | undefined>(undefined);
 
     if (!getCurrentUser()) {
         return <Navigate to="/login" />
@@ -21,6 +22,13 @@ const Home = () : JSX.Element => {
     const set_events_fresh = async () => {
         await getEvents();
         setCurrentEvents(getCurrentEvents());
+    }
+
+    const set_user_events_fresh = async () => {
+        console.log("Button");
+        const user = getCurrentUser();
+        await getUserEvents(user.email);
+        setUserEvents(getCurrentUserEvents());
     }
 
     const check_refresh_date = (events : any) => {
@@ -40,9 +48,17 @@ const Home = () : JSX.Element => {
     }
 
     useEffect(() => {
+        const user_events = getCurrentUserEvents();
+        console.log(user_events)
+        if (user_events) {
+            setUserEvents(user_events);
+        }
+        else {
+            console.log("trying to set")
+            set_user_events_fresh();
+        }
+
         const events = getCurrentEvents();
-        console.log(events)
-        console.log(getUserEvents())
         if (events && check_refresh_date(events)) {
             setCurrentEvents(events);
         }
@@ -60,7 +76,7 @@ const Home = () : JSX.Element => {
         <div>
             <h2>Scheduled Events</h2>
             <h2>Next Weeks Events</h2>
-            {currentEvents ? <Events event_obj={currentEvents.classes}/> : <h3> Loading</h3> } 
+            {currentEvents ? <Events event_obj={currentEvents.classes} events_update={() => {set_user_events_fresh()}} user_events={userEvents}/> : <h3> Loading</h3> } 
         </div>
     );
 }

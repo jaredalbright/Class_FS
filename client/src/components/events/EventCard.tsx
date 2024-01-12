@@ -16,7 +16,9 @@ interface EventObj {
 interface Props {
     event_obj: EventObj,
     start_time: string,
-    e_date: string
+    e_date: string,
+    day: string,
+    events_update: () => void
 }
 
 interface Member {
@@ -24,7 +26,7 @@ interface Member {
     id: number
 }
 
-const EventCard = ({ event_obj, start_time, e_date }: Props) => {
+const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props) => {
     const [showButton, setShowButton] = useState<boolean>(false);
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
     const [otherMembers, setOtherMembers] = useState<Member[] | undefined>(undefined);
@@ -95,7 +97,8 @@ const EventCard = ({ event_obj, start_time, e_date }: Props) => {
         console.log(user);
         member_ids.push(user.memberId)
         
-        const res = addUserEvent(event_obj, start_time, e_date, user.email, member_ids);
+        const res = addUserEvent(event_obj, start_time, e_date, user.email, member_ids, day);
+        events_update();
         setShowConfirm(false);
     }
 
