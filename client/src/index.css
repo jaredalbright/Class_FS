@@ -58,6 +58,8 @@ h1 {
   flex-wrap: wrap;
   background-color: rgba(199, 199, 199, 0.219);
   margin: 0.2rem 0.25rem;
+  max-width: calc(100%/7);
+  min-width: 150px;
 }
 
 .event-card-align {

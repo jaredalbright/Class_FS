@@ -20,7 +20,7 @@ const Hour = ({hour_obj, time, e_date, day, events_update, user_events} : Props)
     else {
       setFilterEvents(hour_obj)
     }
-  }, [])
+  }, [user_events])
 
   return (
     <>

@@ -89,15 +89,13 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
         setConfirmedMembers(addedMembers);
     }
 
-    const confirm = () => {
-        console.log(confirmedMembers);
-        console.log(e_date)
+    // needs to be async so that the user event is added before update is triggered
+    const confirm = async () => {
         let member_ids = confirmedMembers;
         const user = getCurrentUser();
-        console.log(user);
         member_ids.push(user.memberId)
         
-        const res = addUserEvent(event_obj, start_time, e_date, user.email, member_ids, day);
+        await addUserEvent(event_obj, start_time, e_date, user.email, member_ids, day);
         events_update();
         setShowConfirm(false);
     }

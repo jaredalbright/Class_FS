@@ -1,8 +1,21 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
+import UserEventCard from './UserEventCard'
 
-const UserEvents = () => {
+interface Props {
+  user_events: Object | any
+}
+
+const UserEvents = ({user_events}: Props) => {
+  const [userState, setUserState] = useState<any>(undefined)
+
+  useEffect(() => {
+    console.log(userState)
+    setUserState(user_events)
+  }, [user_events])
   return (
-    <div><h2>Scheduled Events</h2></div>
+    <div className='event-container'>
+    {userState ? Object.keys(userState).map((event, i) => (<UserEventCard  key={i} event_obj={userState[event]}/>)) : <></>}
+    </div>
   )
 }
 
