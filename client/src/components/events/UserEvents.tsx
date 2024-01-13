@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import UserEventCard from './UserEventCard'
 
 interface Props {
-  user_events: Object | any
+  user_events: Object | any,
+  events_update: () => void
 }
 
-const UserEvents = ({user_events}: Props) => {
+const UserEvents = ({user_events, events_update}: Props) => {
   const [userState, setUserState] = useState<any>(undefined)
 
   useEffect(() => {
@@ -14,7 +15,7 @@ const UserEvents = ({user_events}: Props) => {
   }, [user_events])
   return (
     <div className='event-container'>
-    {userState ? Object.keys(userState).map((event, i) => (<UserEventCard  key={i} event_obj={userState[event]}/>)) : <></>}
+    {userState ? Object.keys(userState).map((event, i) => (<UserEventCard  key={i} event_obj={userState[event]} events_update={events_update}/>)) : <></>}
     </div>
   )
 }

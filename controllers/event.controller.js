@@ -1,9 +1,9 @@
 const config = require("../config/db.config");
-const db = require("../db");
 const axios = require('axios');
 const ltReq = require('../config/http.config')
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
-const { CloudSchedulerClient } = require('@google-cloud/scheduler');
+const { create_cloud_schedule } = require('./../gcp_services/scheduler.service')
+const { add_user_fb, delete_event_fb, get_user_events} = require('./../gcp_services/firebase.service')
 
 const get_password = async (secretName) => {
     const client = new SecretManagerServiceClient();
@@ -12,133 +12,6 @@ const get_password = async (secretName) => {
     const payload = version.payload.data.toString('utf8');
 
     return payload;
-}
-
-const time_conversion = (dateString, estTime) => {
-    // Construct EST date object
-    const estDateParts = dateString.split("-");
-    const estTimeParts = estTime.split(":");
-
-    const isPM = estTimeParts[1].includes("PM");
-
-    const estDateTime = new Date(
-      Date.UTC(
-        parseInt(estDateParts[0]), // Year
-        parseInt(estDateParts[1]) - 1, // Month (0-indexed)
-        parseInt(estDateParts[2]), // Day
-        (parseInt(estTimeParts[0]) + (isPM ? 12 : 0)) % 24, // Hour
-        parseInt(estTimeParts[1])
-      )
-    );
-
-    const oneWeekDateTime = new Date(estDateTime.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    const estDay = oneWeekDateTime.day;
-    const estMonth = oneWeekDateTime.month;
-    const estYear = oneWeekDateTime.year;
-
-    const isDstObserved = (
-        (estMonth >= 3 && estMonth < 11) || // March to November (inclusive)
-        (estMonth === 2 && estDay >= (14 - (estYear % 7))) || // Second Sunday of March
-        (estMonth === 10 && estDay >= (7 - (estYear % 7))) // First Sunday of November
-    );
-
-    const utcTargetTime = new Date(oneWeekDateTime.getTime() + 60 * 60 * 1000 * (isDstObserved ? 4 : 5));
-
-    // Format UTC date and time using 24-hour format
-    const target = new Intl.DateTimeFormat("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h24", // Use 24-hour clock format
-        timeZone: "UTC", // Ensure UTC formatting
-      }).format(utcTargetTime);
-
-    const utcTriggerTime = new Date(utcTargetTime.getTime() - 60 * 1000);
-
-    // Format UTC date and time using 24-hour format
-    const formattedUtcDate = new Intl.DateTimeFormat("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-    }).format(utcTriggerTime);
-    const formattedUtcTime = new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h24", // Use 24-hour clock format
-      timeZone: "UTC", // Ensure UTC formatting
-    }).format(utcTriggerTime);
-  
-    return { formattedUtcTime, formattedUtcDate, target };
-  };
-
-// TODO Change out URLS for project and switch service account
-const create_cloud_schedule = async (event_id, date, time, member_id, email) => {
-    let time_date = await time_conversion(date, time);
-    let utcTime = time_date.formattedUtcTime.split(":");
-    let utcDate = time_date.formattedUtcDate.split("/");
-    const location = config.functionRegion;
-
-    const client = new CloudSchedulerClient();
-    const parent = client.locationPath(config.projectId, location);
-    const job = {
-        name: parent + "/jobs/" + event_id + "_" + email.split("@")[0],
-        description: `Generated event for ${email}`,
-        schedule: `${utcTime[1]} ${utcTime[0]} ${utcDate[1]} ${utcDate[0]} *`,
-        timeZone: 'UTC', 
-        target: 'httpTarget',
-        httpTarget: {
-          uri: config.functionURL,
-          httpMethod: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Google-Cloud-Scheduler'
-          },
-          body: Buffer.from(JSON.stringify({"event_id": event_id,"trigger_time":time_date.target, "member_id": member_id, "username": email})),
-          oidcToken: {
-            serviceAccountEmail: config.functionEmail,
-            audience: config.functionURL, 
-          }
-        },
-    }
-
-    try {
-        const [response] = await client.createJob({
-                parent: parent,
-                job: job,
-            });
-        return true
-    }
-    catch {
-        console.log("Failure due to Scheduler");
-        return false
-    }
-}
-
-const add_user_fb = async (email, event, start, member_id, date, day) => {
-    const user = db.collection('users').doc(email).collection('events').doc(event.event_id);
-    
-    const doc = await(user.get());
-    if (doc.exists) {
-        console.log("Event Already Created for User");
-        return false
-    }
-
-    try {
-        await user.set({
-            name: event.name,
-            start: start,
-            end: event.end,
-            location: event.location,
-            member_id: member_id,
-            date: date,
-            day: day,
-            status: 'pending'
-            })
-        return true;
-    }
-    catch {
-        return false
-    }
-    
 }
 
 const gen_url = () => {
@@ -233,30 +106,12 @@ exports.events = async (req, res) => {
     }
 }
 
-const format_user_res_data = (response) => {
-    const data = response.docs.map((doc) => {
-        return {id: doc.id, ...doc.data()}
-    })
-
-    const res = {}
-    for (let x in data) {
-        const event = data[x];
-        const {id, ...rest} = event;
-        if ('name' in event) {
-            res[event.id] = {...rest}
-        }
-    }
-    return res
-}
-
 exports.userEvents = async (req, res) => {
     try {
         console.log(req.headers)
         if (req.headers.email) {
             console.log("SUP")
-            const user = await db.collection('users').doc(req.headers.email).collection('events').get();
-            const response = format_user_res_data(user);
-            console.log(response);
+            const response = get_user_events(req.headers.email);
             console.log(`Successfully retrieved User data`);
             res.status(200).send(response);
         }
@@ -272,7 +127,6 @@ exports.addEvent = async (req, res) => {
         if (req.body.email && req.body.event && req.body.start && req.body.member_id && req.body.date && req.body.day) {
             const event = req.body.event
             const create_job_res = await create_cloud_schedule(event.event_id, req.body.date, req.body.start, req.body.member_id, req.body.email);
-            console.log(create_job_res);
             if (!create_job_res) {
                 res.status(400).send({message: "Unable to Create Schedule: Could Be Duplicate"});
                 return
@@ -308,6 +162,18 @@ exports.updateEvent = async (req, res) => {
 }
 exports.removeEvent = async (req, res) => {
     try {
+        console.log(req.headers);
+        if (req.headers.event_id && req.headers.email) {
+            if (delete_event_fb(req.headers.email, req.headers.event_id)) {
+                res.status(202).send({ message: "Event Deleted" });
+            }
+            else {
+                res.status(500).send({ message: "Internal Error" });
+            }
+        }
+        else {
+            res.status(400).send({ message: "Missing Headers" });
+        }
         
     }
     catch (error) {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { removeEvents } from "./event.service";
+import { removeEvents, removeUserEvents } from "./event.service";
 import { auth } from "./event.service";
 
 
@@ -29,6 +29,7 @@ export const login = async (email: string, password: string) => {
 export const logout = () => {
   localStorage.removeItem("user");
   removeEvents();
+  removeUserEvents();
 };
 
 export const getCurrentUser = () => {

@@ -63,26 +63,25 @@ export const addUserEvent = async (event: EventObj, start: string, date: string,
   }
   const response = await axios.post(API_URL + "addUserEvent", payload,   
   { headers: authHeader_LT()})
-  if (true) {
+  if (response.status == 201) {
     console.log("success");
-    // const eventStr = localStorage.getItem("events");
-    // if (eventStr) {
-    //   let events = JSON.parse(eventStr);
-    //   console.log(start);
-    //   console.log(events.classes[date][start]);
-    //   let event_arr = events.classes[date][start];
-    //   event_arr = event_arr.filter((e : any) => (e.event_id == event.event_id))
-    //   events.classes[date][start] = event_arr
-    //   localStorage.setItem("events", JSON.stringify(events));
+    return true;
+  }
+  else {
+    return false;
+  }
+}
 
-    //   const userEventStr = localStorage.getItem("user_events");
-    //   if (userEventStr) {
-    //     let userEvents = JSON.parse(userEventStr);
-    //     let userEvents_arr = userEvents.events;
-    //     userEvents.events = userEvents_arr.push(payload);
-    //     localStorage.setItem("user_events", JSON.stringify(userEvents));
-    //   }
-    // }
+export const deleteUserEvent = async (event_id: string, email: string) => {
+  let headers : any = authHeader();
+  headers['event_id'] = event_id;
+  headers['email'] = email;
+  console.log(headers);
+  const response = await axios.delete(API_URL + "removeUserEvent",   
+  {headers: headers})
+  if (response.status == 202) {
+    console.log("success");
+    return true;
   }
   else {
     return false;
@@ -103,28 +102,13 @@ export const getUserEvents = (email: string) => {
     });
 }
 
+export const removeUserEvents = () => {
+  localStorage.removeItem("user_events");
+}
+
 export const getCurrentUserEvents = () => {
   const eventStr = localStorage.getItem("user_events");
   if (eventStr) return JSON.parse(eventStr);
 
   return null;
 }
-
-// TODO MAKE SURE DATE IS GOINGIN
-// export const makeRes = () => {
-//   console.log(authHeader_LT())
-//   return axios.post(API_URL + 'addUserEvent', {
-//     email: email,
-//     event: event,
-//     member_id: memberID
-//   },
-//   { headers: authHeader_LT() 
-//   })
-//     .then((response) => {
-//       if (response.data.classes) {
-//         localStorage.setItem("events", JSON.stringify(response.data));
-//       }
-
-//       return response.data
-//     });
-// }
