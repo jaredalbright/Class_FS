@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import { getCurrentUser } from './../../services/auth.service';
 import { addUserEvent } from "../../services/event.service";
 import { eventNameParse } from "../../services/card.service";
+import LoadingAnimation from "../LoadingAnimation";
 
 interface EventObj {
     name: string,
@@ -29,6 +30,7 @@ interface Member {
 const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props) => {
     const [showButton, setShowButton] = useState<boolean>(false);
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
+    const [showLoading, setShowLoading] = useState<boolean>(false);
     const [otherMembers, setOtherMembers] = useState<Member[] | undefined>(undefined);
     const [checks, setChecks] = useState<boolean[] | undefined>(undefined);
     const [confirmedMembers, setConfirmedMembers] = useState<number[]>([]);
@@ -51,15 +53,17 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
 
     // needs to be async so that the user event is added before update is triggered
     const confirm = async () => {
+        setShowLoading(true);
         let member_ids = confirmedMembers;
         const user = getCurrentUser();
         member_ids.push(user.memberId)
         
-        const res = await addUserEvent(event_obj, start_time, e_date, user.email, member_ids, day);
-        if (res) {
-            events_update();
-            setShowConfirm(false);
-        }
+        // const res = await addUserEvent(event_obj, start_time, e_date, user.email, member_ids, day);
+        // if (res) {
+        //     events_update();
+        //     setShowConfirm(false);
+        // }
+        // setShowLoading(false);
     }
 
     useEffect(() => {
@@ -81,10 +85,12 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
             <p className='location'>{showButton ? event_obj.location : event_obj.location.split(",")[1]}</p>
             {showButton ? <button onClick={() => setShowConfirm(true)}>Confirm Booking</button> : <></>}
         </div>
-        <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}}>
+        <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}} className="modal-center">
                 <Modal.Header closeButton>
                 <Modal.Title>{event_obj.name}</Modal.Title>
                 </Modal.Header>
+                {showLoading ? <LoadingAnimation /> :
+                <>
                 {otherMembers ? <Modal.Body>Add Additional Members: {otherMembers.map((member, i) => (<div key={i}><input type="checkbox" value={member.id} onChange={e => setMemberCheck(e, member.id)}/>{member.name}</div>))}</Modal.Body> : <></>}
                 <Modal.Footer>
                 <button onClick={() => {setShowConfirm(false)}}>
@@ -94,6 +100,8 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
                     Confirm Booking
                 </button>
                 </Modal.Footer>
+                </>
+                }
             </Modal>
         </div>
     )

@@ -45,7 +45,7 @@ exports.auth = async (req, res) => {
                 {
                   algorithm: 'HS256',
                   allowInsecureKeySizes: true,
-                  expiresIn: 86400, // 24 hours
+                  expiresIn: 3600, // 24 hours
             });
 
             console.log(`${req.body.email} successful Auth`);

@@ -1,6 +1,7 @@
-import React from 'react'
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import IUser from '../types/user.type'
+import Pickleball from "../Pickleball.png"
 
 interface Props {
     currentUser: IUser | undefined,
@@ -11,9 +12,11 @@ const Header = ({currentUser, logOut} : Props) => {
     return (
     <div className='header'>
       <div className='modal fade'>
-        HEllooo
       </div>
-        <h1 id='title-text' className='header-item'>Pickleball Scheduler</h1>
+      <div className='header-item flex-header-items'>
+        <h1 id='title-text'>Pickleball Scheduler</h1>
+        <img src={Pickleball} className='header-ball-style'/>
+        </div>
         {currentUser ? (
           <div className="navbar-nav header-item log-item">
             <li className="nav-item">

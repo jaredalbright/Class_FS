@@ -24,8 +24,10 @@ const Day = ({day_obj, date, events_update, user_events} : Props) => {
 
     return (
         <div className='day-container'>
+            <div className = 'sticky-header'>
             <h5 className='event-card-align'>{day}</h5>
             <h6 className='event-card-align'>{date.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$2-$3")}</h6>
+            </div>
         {day_obj ? Object.keys(day_obj).map((hour, i) => (<Hour key={i} hour_obj={day_obj[hour]} time={hour} e_date={date} events_update={events_update} day = {day} user_events={userState}/>)) : <h3>Loading</h3>}
         </div>
     )

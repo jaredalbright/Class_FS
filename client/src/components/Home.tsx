@@ -4,6 +4,7 @@ import Events from './events/Events'
 import { getCurrentUser } from './../services/auth.service';
 import { getCurrentEvents, getEvents, getCurrentUserEvents, getUserEvents } from '../services/event.service';
 import UserEvents from './events/UserEvents'
+import LoadingAnimation from './LoadingAnimation';
 
 interface Event {
     classes: Object
@@ -73,7 +74,7 @@ const Home = () : JSX.Element => {
             <h2>Scheduled Events</h2>
             {userEvents ? <UserEvents user_events={userEvents} events_update={() => {set_user_events_fresh()}}/> : <></>}
             <h2>Next Weeks Events</h2>
-            {currentEvents ? <Events event_obj={currentEvents.classes} events_update={() => {set_user_events_fresh()}} user_events={userEvents}/> : <h3> Loading</h3> } 
+            {currentEvents ? <Events event_obj={currentEvents.classes} events_update={() => {set_user_events_fresh()}} user_events={userEvents}/> : <LoadingAnimation /> } 
         </div>
     );
 }

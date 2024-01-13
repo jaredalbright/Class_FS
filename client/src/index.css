@@ -40,7 +40,7 @@ h1 {
 }
 
 .header-item {
-  padding: 0.5rem 1rem 1rem 1rem;
+  padding: 0.5rem 1rem 1rem 0rem;
 }
 
 .log-item {
@@ -83,4 +83,39 @@ h1 {
 
 .time-format { 
   font-size: 0.9rem;
+}
+
+.sticky-header {
+  background-color: rgba(199, 199, 199, 1.000);
+  position: sticky;
+  top: 0;
+}
+
+.loading-ball-style {
+  width: 4rem;
+  height: 4rem;
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 12rem;
+  height: 12rem;
+}
+
+.flex-header-items {
+  display: flex;
+  align-items: flex-end;
+}
+
+.header-ball-style {
+  width: 2rem;
+  height: 2rem;
+  margin: 0px 0px 10px 10px;
+}
+
+.modal-center {
+  display: flex;
+  align-items: center;
 }

@@ -8,6 +8,7 @@ import Register from "./components/login/Register";
 import Home from './components/Home';
 import { getCurrentUser, logout } from './services/auth.service';
 import Header from './components/Header';
+import AuthVerify from './common/AuthVerify';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<IUser | undefined>(undefined);
@@ -39,7 +40,8 @@ function App() {
             <Route path="/register" element={<Register/>} />
           </Routes>
         </div>
-      
+        
+        <AuthVerify logOut={logOut} />
       </div>
     </>
   )
