@@ -53,9 +53,9 @@ exports.add_user_fb = async (email, event, start, member_id, date, day) => {
 exports.delete_event_fb = async(email, event_id) => {
     const user = db.collection('users').doc(email).collection('events').doc(event_id);
 
-    const doc = await(user.get());
+    const doc = await user.get();
     if (doc.exists) {
-        const res = await(doc.delete());
+        const res = await user.delete();
         console.log("Event Already Created for User");
         return true
     }

@@ -2,7 +2,7 @@ const config = require("../config/db.config");
 const axios = require('axios');
 const ltReq = require('../config/http.config')
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
-const { create_cloud_schedule } = require('./../gcp_services/scheduler.service')
+const { create_cloud_schedule, delete_cloud_schedule } = require('./../gcp_services/scheduler.service')
 const { add_user_fb, delete_event_fb, get_user_events} = require('./../gcp_services/firebase.service')
 
 const get_password = async (secretName) => {
@@ -108,10 +108,10 @@ exports.events = async (req, res) => {
 
 exports.userEvents = async (req, res) => {
     try {
-        console.log(req.headers)
         if (req.headers.email) {
             console.log("SUP")
-            const response = get_user_events(req.headers.email);
+            const response = await get_user_events(req.headers.email);
+            console.log(response);
             console.log(`Successfully retrieved User data`);
             res.status(200).send(response);
         }
@@ -164,11 +164,17 @@ exports.removeEvent = async (req, res) => {
     try {
         console.log(req.headers);
         if (req.headers.event_id && req.headers.email) {
-            if (delete_event_fb(req.headers.email, req.headers.event_id)) {
-                res.status(202).send({ message: "Event Deleted" });
+            if (await delete_cloud_schedule(req.headers.event_id, req.headers.email))
+            {
+                if (await delete_event_fb(req.headers.email, req.headers.event_id)) {
+                    res.status(202).send({ message: "Event Deleted" });
+                }
+                else {
+                    res.status(500).send({ message: "Failure to Delete Database Entry" });
+                }
             }
             else {
-                res.status(500).send({ message: "Internal Error" });
+                res.status(500).send({ message: "Failure to Delete Schedule" });
             }
         }
         else {

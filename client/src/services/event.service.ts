@@ -88,18 +88,17 @@ export const deleteUserEvent = async (event_id: string, email: string) => {
   }
 }
 
-export const getUserEvents = (email: string) => {
+export const getUserEvents = async (email: string) => {
   let headers : any = authHeader();
   headers['email'] = email;
-  return axios.get(API_URL + 'userEvents', { headers: headers
+  console.log("GETEVNETS");
+  const response = await axios.get(API_URL + 'userEvents', { headers: headers
   })
-    .then((response) => {
-      if (response.data) {
-        localStorage.setItem("user_events", JSON.stringify(response.data));
-      }
-
-      return response.data
-    });
+  if (response.data) {
+    localStorage.setItem("user_events", JSON.stringify(response.data));
+    return response.data;
+  }
+  return false;
 }
 
 export const removeUserEvents = () => {

@@ -17,10 +17,11 @@ interface EventObj {
 
 interface Props {
     event_obj: EventObj,
+    event_id: any,
     events_update: () => void
 }
 
-const UserEventCard = ({ event_obj, events_update }: Props) => {
+const UserEventCard = ({ event_obj, event_id, events_update }: Props) => {
     const [showButton, setShowButton] = useState<boolean>(false);
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
@@ -28,7 +29,8 @@ const UserEventCard = ({ event_obj, events_update }: Props) => {
         const user = getCurrentUser();
 
         console.log(event_obj);
-        if (await deleteUserEvent(event_obj.event_id, user.email)) {
+        if (await deleteUserEvent(event_id, user.email)) {
+            console.log("DELETED")
             events_update();
             setShowConfirm(false);        
         }

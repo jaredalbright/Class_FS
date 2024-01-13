@@ -15,7 +15,7 @@ const UserEvents = ({user_events, events_update}: Props) => {
   }, [user_events])
   return (
     <div className='event-container'>
-    {userState ? Object.keys(userState).map((event, i) => (<UserEventCard  key={i} event_obj={userState[event]} events_update={events_update}/>)) : <></>}
+    {userState ? Object.keys(userState).map((event, i) => (<UserEventCard  key={i} event_obj={userState[event]} event_id={event} events_update={events_update}/>)) : <></>}
     </div>
   )
 }

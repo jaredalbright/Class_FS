@@ -95,7 +95,24 @@ exports.create_cloud_schedule = async (event_id, date, time, member_id, email) =
         return true
     }
     catch {
-        console.log(response);
         return false
     }
+}
+
+exports.delete_cloud_schedule = async (event_id, email) => {
+  const location = config.functionRegion;
+  const client = new CloudSchedulerClient();
+  const parent = client.locationPath(config.projectId, location);
+  const name = parent + "/jobs/" + event_id + "_" + email.split("@")[0]
+  const request = {
+    name,
+  }
+
+  try {
+    const [response] = await client.deleteJob(request);
+    return true
+  }
+  catch {
+    return false
+  }
 }

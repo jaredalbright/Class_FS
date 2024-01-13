@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import Schedule from './Schedule'
+import { useState, useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
-import IUser from '../types/user.type'
 import Events from './events/Events'
 import { getCurrentUser } from './../services/auth.service';
-import { auth, getCurrentEvents, getEvents, getCurrentUserEvents, getUserEvents } from '../services/event.service';
+import { getCurrentEvents, getEvents, getCurrentUserEvents, getUserEvents } from '../services/event.service';
 import UserEvents from './events/UserEvents'
 
 interface Event {
     classes: Object
 }
-
 
 const Home = () : JSX.Element => {
     const [currentEvents, setCurrentEvents] = useState<Event | undefined>(undefined);
@@ -50,12 +47,10 @@ const Home = () : JSX.Element => {
 
     useEffect(() => {
         const user_events = getCurrentUserEvents();
-        console.log(user_events)
         if (user_events) {
             setUserEvents(user_events);
         }
         else {
-            console.log("trying to set")
             set_user_events_fresh();
         }
 
