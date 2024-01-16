@@ -124,14 +124,15 @@ exports.userEvents = async (req, res) => {
 }
 exports.addEvent = async (req, res) => {
     try {
-        if (req.body.email && req.body.event && req.body.start && req.body.member_id && req.body.date && req.body.day) {
+        if (req.body.email && req.body.event && req.body.start && req.body.member_id && req.body.date && req.body.day && req.body.other_members) {
             const event = req.body.event
             const create_job_res = await create_cloud_schedule(event.event_id, req.body.date, req.body.start, req.body.member_id, req.body.email);
             if (!create_job_res) {
                 res.status(400).send({message: "Unable to Create Schedule: Could Be Duplicate"});
                 return
             }
-            const response = await add_user_fb(req.body.email, event, req.body.start, req.body.member_id, req.body.date, req.body.day);
+            console.log(req.body.other_members);
+            const response = await add_user_fb(req.body.email, event, req.body.start, req.body.member_id, req.body.date, req.body.day, req.body.other_members);
             if (response) {
                 res.status(201).send({message: "Successfully Created job"});
             }

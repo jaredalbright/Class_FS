@@ -15,7 +15,7 @@ const Events = ({event_obj, events_update, user_events} : Props) => {
     setUserState(user_events)
   }, [user_events])
   return (
-    <div>
+    <div className='color'>
         <div className='event-container'>
         {event_obj ? 
           Object.keys(event_obj).map((day, i) => (<Day key={i} day_obj={event_obj[day]} date={day} events_update={events_update} user_events={userState}/>)) 

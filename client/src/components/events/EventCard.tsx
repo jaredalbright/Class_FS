@@ -23,7 +23,7 @@ interface Props {
 }
 
 interface Member {
-    name: String,
+    name: string,
     id: number
 }
 
@@ -33,11 +33,13 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
     const [showLoading, setShowLoading] = useState<boolean>(false);
     const [otherMembers, setOtherMembers] = useState<Member[] | undefined>(undefined);
     const [checks, setChecks] = useState<boolean[] | undefined>(undefined);
-    const [confirmedMembers, setConfirmedMembers] = useState<number[]>([]);
+    const [confirmedMembers, setConfirmedMembers] = useState<Member[]>([]);
 
 
-    const setMemberCheck = (e: ChangeEvent<HTMLInputElement>,new_member : number) => {
+    const setMemberCheck = (e: ChangeEvent<HTMLInputElement>,new_member : Member) => {
         let addedMembers = confirmedMembers;
+
+        console.log(new_member);
 
         if (e.target.checked) {
             addedMembers.push(new_member);
@@ -54,16 +56,19 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
     // needs to be async so that the user event is added before update is triggered
     const confirm = async () => {
         setShowLoading(true);
-        let member_ids = confirmedMembers;
+        let otherMembers = confirmedMembers;
+
+        const memberIDs = otherMembers.map((member) => (member.id));
         const user = getCurrentUser();
-        member_ids.push(user.memberId)
+        memberIDs.push(user.memberId);
         
-        // const res = await addUserEvent(event_obj, start_time, e_date, user.email, member_ids, day);
-        // if (res) {
-        //     events_update();
-        //     setShowConfirm(false);
-        // }
-        // setShowLoading(false);
+        const res = await addUserEvent(event_obj, start_time, e_date, user.email, memberIDs, day, otherMembers);
+        if (res) {
+            events_update();
+            setShowConfirm(false);
+        }
+        setShowLoading(false);
+        setConfirmedMembers([]);
     }
 
     useEffect(() => {
@@ -91,7 +96,7 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
                 </Modal.Header>
                 {showLoading ? <LoadingAnimation /> :
                 <>
-                {otherMembers ? <Modal.Body>Add Additional Members: {otherMembers.map((member, i) => (<div key={i}><input type="checkbox" value={member.id} onChange={e => setMemberCheck(e, member.id)}/>{member.name}</div>))}</Modal.Body> : <></>}
+                {otherMembers ? <Modal.Body>Add Additional Members: {otherMembers.map((member, i) => (<div key={i}><input type="checkbox" value={member.id} onChange={e => setMemberCheck(e, member)}/>{member.name}</div>))}</Modal.Body> : <></>}
                 <Modal.Footer>
                 <button onClick={() => {setShowConfirm(false)}}>
                     Cancel

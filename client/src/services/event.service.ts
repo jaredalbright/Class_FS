@@ -52,14 +52,20 @@ interface EventObj {
   paid: boolean
 }
 
-export const addUserEvent = async (event: EventObj, start: string, date: string, email: string, memberID: Array<number>, day: string) => {
+interface Member {
+    name: string,
+    id: number
+}
+
+export const addUserEvent = async (event: EventObj, start: string, date: string, email: string, memberID: Array<number>, day: string, otherMembers: Array<Member>) => {
   const payload = {
     email: email,
     event: event,
     member_id: memberID,
     start: start,
     date: date,
-    day: day
+    day: day,
+    other_members: otherMembers
   }
   const response = await axios.post(API_URL + "addUserEvent", payload,   
   { headers: authHeader_LT()})
@@ -91,7 +97,6 @@ export const deleteUserEvent = async (event_id: string, email: string) => {
 export const getUserEvents = async (email: string) => {
   let headers : any = authHeader();
   headers['email'] = email;
-  console.log("GETEVNETS");
   const response = await axios.get(API_URL + 'userEvents', { headers: headers
   })
   if (response.data) {

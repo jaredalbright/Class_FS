@@ -22,9 +22,10 @@ exports.get_user_events = async (email) => {
     return response;
 }
 
-exports.add_user_fb = async (email, event, start, member_id, date, day) => {
+exports.add_user_fb = async (email, event, start, member_id, date, day, other_members) => {
     const user = db.collection('users').doc(email).collection('events').doc(event.event_id);
-    
+    console.log("MEMBER STUFF");
+    console.log(member_id);
     const doc = await(user.get());
     if (doc.exists) {
         console.log("Event Already Created for User");
@@ -38,6 +39,7 @@ exports.add_user_fb = async (email, event, start, member_id, date, day) => {
             end: event.end,
             location: event.location,
             member_id: member_id,
+            other_members: other_members,
             date: date,
             day: day,
             status: 'pending'
