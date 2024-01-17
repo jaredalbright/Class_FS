@@ -13,10 +13,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.color {
-  
-}
-
 a {
   font-weight: 500;
   color: #646cff;
@@ -75,10 +71,24 @@ h1 {
 }
 
 .event-card {
-  background-color: rgba(199, 199, 199, 0.400);
+  background-color: rgba(199, 199, 199, 0.200);
   padding: 1rem 1rem;
   cursor: pointer;
-  max-width: 150px;
+  border-radius: 5px;
+}
+
+.event-card:hover {
+  background: #345883;
+  box-shadow: inset -28px -28px 56px #2d4d72,
+              inset 28px 28px 56px #3b6394;
+}
+
+.event-card-reg {
+  max-width: 200px;
+}
+
+.event-card-user {
+  width: 200px;
 }
 
 .center {
@@ -90,8 +100,10 @@ h1 {
 }
 
 .sticky-header {
-  background-color: rgba(199, 199, 199, 1.000);
+  background-color: rgba(111,133,159);
+  box-shadow: 0 2px 4px -2px black;
   position: sticky;
+  border-radius: 2px 2px 0px 0px;
   top: 0;
 }
 
@@ -122,4 +134,72 @@ h1 {
 .modal-center {
   display: flex;
   align-items: center;
+}
+
+.user-time {
+  font-size: 12px;
+}
+.user-date {
+  margin-top: -10px;
+}
+
+.booking {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: inline-block;
+  text-align: center;
+  font-weight: bold;
+  padding: 0.7em 2em;
+  border: 3px solid;
+  border-radius: 2px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  transition: 0.3s ease all;
+  z-index: 1;
+  align-self: center;
+}
+
+.booking:before {
+  transition: 0.5s all ease;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  right: 50%;
+  bottom: 0;
+  opacity: 0;
+  content: '';
+  z-index: -1;
+}
+
+.booking:hover, .booking:focus {
+  color: white;
+}
+
+.booking:hover:before, .booking:focus:before {
+  transition: 0.5s all ease;
+  left: 0;
+  right: 0;
+  opacity: 1;
+}
+
+.booking:active {
+  transform: scale(0.9);
+}
+
+.booking-confirm {
+  color: rgba(111,133,159);
+}
+
+.booking-confirm:before {
+  background-color: rgba(111,133,159);
+}
+
+.booking-cancel {
+  color: rgb(167, 2, 2);
+}
+
+.booking-cancel:before {
+  background-color: rgb(167, 2, 2);
 }

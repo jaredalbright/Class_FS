@@ -41,13 +41,13 @@ const UserEventCard = ({ event_obj, event_id, events_update }: Props) => {
     }
     return (
         <>
-        <div className="event-card event-card-align" onClick={() => setShowButton(!showButton)}>
+        <div className="event-card event-card-align event-card-user" onClick={() => setShowButton(!showButton)}>
             <h6>{showButton ? event_obj.name : eventNameParse(event_obj.name)}</h6>
-            <p className='time'>{event_obj.day} {event_obj.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$2-$3")}</p>
-            <p className='time'>{event_obj.start} - {event_obj.end}</p>
-            <p className='time'>{event_obj.other_members ? <div>Other Members: {event_obj.other_members.map((member) => (member.name))} </div>: <></>}</p>
+            <p className='user-time'><b>{event_obj.start}</b> - {event_obj.end}</p>
+            <p className='user-date'>{event_obj.day} {event_obj.date.replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$2-$3")}</p>
+            <div className='time'>{showButton ? <p>Other Members: {event_obj.other_members.map((member) => (member.name))} </p>: <></>}</div>
             <p className='location'>{showButton ? event_obj.location : event_obj.location.split(",")[1]}</p>
-            {showButton ? <button onClick={() => setShowConfirm(true)}>Delete Booking</button> : <></>}
+            {showButton ? <button className="booking booking-confirm" onClick={() => setShowConfirm(true)}>Delete Booking</button> : <></>}
         </div>
         <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}}>
                 <Modal.Header closeButton>
@@ -58,10 +58,10 @@ const UserEventCard = ({ event_obj, event_id, events_update }: Props) => {
                     <p>Warning deleting this booking will delete for all members. To add additional members please delete and rebook.</p>
                 </Modal.Body>
                 <Modal.Footer>
-                <button onClick={() => {setShowConfirm(false)}}>
+                <button className="booking booking-cancel" onClick={() => {setShowConfirm(false)}}>
                     Cancel
                 </button>
-                <button onClick={() => {confirm()}}>
+                <button className="booking booking-confirm" onClick={() => {confirm()}}>
                     Confirm Delete
                 </button>
                 </Modal.Footer>

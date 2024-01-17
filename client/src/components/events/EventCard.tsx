@@ -83,12 +83,12 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
     }, [])
     return (
         <div>
-        <div className="event-card event-card-align" onClick={() => setShowButton(!showButton)}>
+        <div className="event-card event-card-align event-card-reg" onClick={() => setShowButton(!showButton)}>
             <h6>{showButton ? event_obj.name : eventNameParse(event_obj.name)}</h6>
             {event_obj.paid ? <h6>EXTRA COST $$$</h6> : <></>}
             <p className='time'>{start_time} - {event_obj.end}</p>
             <p className='location'>{showButton ? event_obj.location : event_obj.location.split(",")[1]}</p>
-            {showButton ? <button onClick={() => setShowConfirm(true)}>Confirm Booking</button> : <></>}
+            {showButton ? <button className="booking booking-confirm" onClick={() => setShowConfirm(true)}>Create Booking</button> : <></>}
         </div>
         <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}} className="modal-center">
                 <Modal.Header closeButton>
@@ -98,10 +98,10 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
                 <>
                 {otherMembers ? <Modal.Body>Add Additional Members: {otherMembers.map((member, i) => (<div key={i}><input type="checkbox" value={member.id} onChange={e => setMemberCheck(e, member)}/>{member.name}</div>))}</Modal.Body> : <></>}
                 <Modal.Footer>
-                <button onClick={() => {setShowConfirm(false)}}>
+                <button className="booking booking-cancel"onClick={() => {setShowConfirm(false)}}>
                     Cancel
                 </button>
-                <button onClick={() => {confirm()}}>
+                <button className="booking booking-confirm" onClick={() => {confirm()}}>
                     Confirm Booking
                 </button>
                 </Modal.Footer>

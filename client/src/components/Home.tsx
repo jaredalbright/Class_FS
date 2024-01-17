@@ -61,7 +61,6 @@ const Home = () : JSX.Element => {
         }
         else {
             const user = getCurrentUser();
-            console.log(user);
             if (user.x_ltf_profile && user.x_ltf_ssoid) {
                 set_events_fresh();
             }

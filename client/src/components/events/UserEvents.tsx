@@ -10,7 +10,6 @@ const UserEvents = ({user_events, events_update}: Props) => {
   const [userState, setUserState] = useState<any>(undefined)
 
   useEffect(() => {
-    console.log(userState)
     setUserState(user_events)
   }, [user_events])
   return (
