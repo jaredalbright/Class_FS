@@ -1,5 +1,5 @@
 const checkPlusOne = (text: string) => {
-    const index = text.indexOf("Each member that signs up bring 1 member");
+    const index = text.indexOf("bring 1 member");
 
     if (index !== -1) {
         return true;
@@ -17,8 +17,12 @@ export const eventNameParse = (text: string) => {
     const above = new RegExp("\\d+\\.\\d+\\+");
     const above_m = text.match(above);
 
-    if (text.toUpperCase().indexOf("ALL LEVELS") !== -1 || text.indexOf("Pickleball Open Play: Drill and Play") !== -1) {
+    if (text.toUpperCase().indexOf("ALL LEVELS") !== -1) {
         parsed_text = "All Levels Play"
+    }
+    
+    if(text.indexOf("Pickleball Open Play: Drill and Play") !== -1) {
+        parsed_text = "Drill and Play"
     }
 
     if (range_m) {
