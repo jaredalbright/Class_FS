@@ -25,7 +25,7 @@ const Hour = ({hour_obj, time, e_date, day, events_update, user_events} : Props)
   return (
     <>
         {(filterEvents.length > 0) ? <div>
-          <h6 className='time-format event-card-align'>{time}</h6>
+          <h6 className='time-format '>{time}</h6>
           {filterEvents.map((act :any, i: string) => 
         (<EventCard key={i} event_obj={act} start_time={time} e_date={e_date} day={day} events_update={events_update}/>))} 
         </div>

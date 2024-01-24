@@ -97,14 +97,19 @@ h1 {
 
 .time-format { 
   font-size: 0.9rem;
+  box-shadow: 0 2px 7px -2px black;
+  padding: .1rem .75rem;
+  margin-bottom: -0.1rem;
 }
 
 .sticky-header {
   background-color: rgba(111,133,159);
   box-shadow: 0 2px 4px -2px black;
   position: sticky;
-  border-radius: 2px 2px 0px 0px;
+  border-radius: 5px 5px 0px 0px;
   top: 0;
+  padding-left: .55rem;
+  padding-bottom: 0.25rem;
 }
 
 .loading-ball-style {
@@ -202,4 +207,8 @@ h1 {
 
 .booking-cancel:before {
   background-color: rgb(167, 2, 2);
+}
+
+.home {
+  margin: auto;
 }

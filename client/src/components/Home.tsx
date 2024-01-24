@@ -69,7 +69,7 @@ const Home = () : JSX.Element => {
     }, [])
 
     return (
-        <div>
+        <div className='home'>
             <h2>Scheduled Events</h2>
             {userEvents ? <UserEvents user_events={userEvents} events_update={() => {set_user_events_fresh()}}/> : <></>}
             <h2>Next Weeks Events</h2>
