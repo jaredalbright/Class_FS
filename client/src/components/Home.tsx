@@ -24,7 +24,6 @@ const Home = () : JSX.Element => {
     }
 
     const set_user_events_fresh = async () => {
-        console.log("Button");
         const user = getCurrentUser();
         await getUserEvents(user.email);
         setUserEvents(getCurrentUserEvents());
@@ -70,7 +69,7 @@ const Home = () : JSX.Element => {
 
     return (
         <div className='home'>
-            <h2>Scheduled Events</h2>
+            <h2>Scheduled Jobs</h2>
             {userEvents ? <UserEvents user_events={userEvents} events_update={() => {set_user_events_fresh()}}/> : <></>}
             <h2>Next Weeks Events</h2>
             {currentEvents ? <Events event_obj={currentEvents.classes} events_update={() => {set_user_events_fresh()}} user_events={userEvents}/> : <LoadingAnimation /> } 

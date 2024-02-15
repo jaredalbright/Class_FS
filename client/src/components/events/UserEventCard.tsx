@@ -33,7 +33,6 @@ const UserEventCard = ({ event_obj, event_id, events_update }: Props) => {
     const confirm = async () => {
         const user = getCurrentUser();
 
-        console.log(event_obj);
         if (await deleteUserEvent(event_id, user.email)) {
             events_update();
             setShowConfirm(false);        
@@ -54,8 +53,9 @@ const UserEventCard = ({ event_obj, event_id, events_update }: Props) => {
                 <Modal.Title>{event_obj.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>Other Members: {event_obj.other_members.map((member) => (member.name))}</p>
+                    {event_obj.other_members.length > 0 ?  <p>Other Members: {event_obj.other_members.map((member) => (member.name))}</p> : <></>}
                     <p>Warning deleting this booking will delete for all members. To add additional members please delete and rebook.</p>
+                    <p>If the class has already been booked this will not delete the class.</p>
                 </Modal.Body>
                 <Modal.Footer>
                 <button className="booking booking-cancel" onClick={() => {setShowConfirm(false)}}>

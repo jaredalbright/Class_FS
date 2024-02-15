@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {authHeader, authHeader_LT} from './auth.header';
 
-const API_URL = 'http://localhost:8000/api/events/';
+const API_URL = "/api/events/";
 
 // TODO ADD CHECK FOR AUTH EXP
 export const auth = (email : string) => {
@@ -70,7 +70,6 @@ export const addUserEvent = async (event: EventObj, start: string, date: string,
   const response = await axios.post(API_URL + "addUserEvent", payload,   
   { headers: authHeader_LT()})
   if (response.status == 201) {
-    console.log("success");
     return true;
   }
   else {
@@ -82,11 +81,9 @@ export const deleteUserEvent = async (event_id: string, email: string) => {
   let headers : any = authHeader();
   headers['event_id'] = event_id;
   headers['email'] = email;
-  console.log(headers);
   const response = await axios.delete(API_URL + "removeUserEvent",   
   {headers: headers})
   if (response.status == 202) {
-    console.log("success");
     return true;
   }
   else {

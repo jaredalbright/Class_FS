@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import IUser from '../types/user.type'
 import Pickleball from "../Pickleball.png"

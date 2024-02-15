@@ -112,6 +112,10 @@ h1 {
   padding-bottom: 0.25rem;
 }
 
+.background-color {
+  background-color: #023870;
+}
+
 .loading-ball-style {
   width: 4rem;
   height: 4rem;

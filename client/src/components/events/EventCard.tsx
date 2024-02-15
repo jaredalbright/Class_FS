@@ -32,7 +32,6 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
     const [showLoading, setShowLoading] = useState<boolean>(false);
     const [otherMembers, setOtherMembers] = useState<Member[] | undefined>(undefined);
-    const [checks, setChecks] = useState<boolean[] | undefined>(undefined);
     const [confirmedMembers, setConfirmedMembers] = useState<Member[]>([]);
 
 
@@ -65,8 +64,8 @@ const EventCard = ({ event_obj, start_time, e_date, day, events_update }: Props)
         const res = await addUserEvent(event_obj, start_time, e_date, user.email, memberIDs, day, otherMembers);
         if (res) {
             events_update();
-            setShowConfirm(false);
         }
+        setShowConfirm(false);
         setShowLoading(false);
         setConfirmedMembers([]);
     }

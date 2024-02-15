@@ -16,20 +16,17 @@ function App() {
     if (user) {
       setCurrentUser(user);
     }
-
-    return () => {
-
-    }
   }, []);
 
   const logOut = () => {
     logout(); // Auth service import
     setCurrentUser(undefined);
+    console.log("Logged out");
   };
 
   return (
     <>
-      <div>
+      <div className='background-color'>
         <Header logOut={logOut} currentUser={currentUser}/>
         <div>
           <Routes>
