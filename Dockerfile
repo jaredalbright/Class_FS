@@ -7,6 +7,8 @@ WORKDIR /app
 # Install Nginx
 RUN apk add --no-cache nginx && mkdir -p /run/nginx
 
+RUN apk --no-cache add curl
+
 # Copy and install backend dependencies
 COPY ./backend/package*.json ./backend/
 RUN cd backend && npm install
