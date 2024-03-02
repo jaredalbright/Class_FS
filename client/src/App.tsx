@@ -25,7 +25,6 @@ function App() {
   };
 
   return (
-    <>
       <div className='background-color'>
         <Header logOut={logOut} currentUser={currentUser}/>
         <div>
@@ -38,7 +37,6 @@ function App() {
         
         <AuthVerify logOut={logOut} />
       </div>
-    </>
   )
 }
 

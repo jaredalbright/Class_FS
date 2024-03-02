@@ -216,3 +216,7 @@ h1 {
 .home {
   margin: auto;
 }
+
+.cardstuff {
+  height: 90vh;
+}
