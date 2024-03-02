@@ -15,8 +15,8 @@ const get_password = async (secretName) => {
 
 const gen_url = () => {
     const today = new Date();
-    const one_week = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const two_weeks = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const one_week = new Date(today.getTime() + 8 * 24 * 60 * 60 * 1000);
+    const two_weeks = new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000);
     const oneWeekFormatted = one_week.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).split('/');
     const twoWeeksFormatted = two_weeks.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).split('/');
     const url = `/ux/web-schedules/v2/schedules/classes?start=${oneWeekFormatted[0]}%2F${oneWeekFormatted[1]}%2F${oneWeekFormatted[2]}&end=${twoWeeksFormatted[0]}%2F${twoWeeksFormatted[1]}%2F${twoWeeksFormatted[2]}&tags=format%3AClass&locations=Sky%20(Manhattan)&isFree=false&isLiveStreaming=false&facet=tags%3Ainterest%2Ctags%3AdepartmentDescription%2Ctags%3AtimeOfDay%2Ctags%3Aage%2Ctags%3AskillLevel%2Ctags%3Aintensity%2Cleader.name.displayname%2Clocation.name%2Ctags%3Aresource&page=1&pageSize=750&tags=interest:Pickleball`;

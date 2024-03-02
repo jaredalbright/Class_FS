@@ -17,8 +17,9 @@ const time_conversion = (dateString, estTime) => {
         parseInt(estTimeParts[1])
       )
     );
-
-    const oneWeekDateTime = new Date(estDateTime.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    // the bookings are now 7 days and 22 hours
+    const oneWeekDateTime = new Date(estDateTime.getTime() - ((7 * 24) + 22) * 60 * 60 * 1000);
 
     const estDay = oneWeekDateTime.day;
     const estMonth = oneWeekDateTime.month;
@@ -36,7 +37,7 @@ const time_conversion = (dateString, estTime) => {
     const target = new Intl.DateTimeFormat("en-US", {
         hour: "2-digit",
         minute: "2-digit",
-        hourCycle: "h24", // Use 24-hour clock format
+        hourCycle: "h23", // Use 24-hour clock format
         timeZone: "UTC", // Ensure UTC formatting
       }).format(utcTargetTime);
 
@@ -50,7 +51,7 @@ const time_conversion = (dateString, estTime) => {
     const formattedUtcTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hourCycle: "h24", // Use 24-hour clock format
+      hourCycle: "h23", // Use 24-hour clock format
       timeZone: "UTC", // Ensure UTC formatting
     }).format(utcTriggerTime);
   
