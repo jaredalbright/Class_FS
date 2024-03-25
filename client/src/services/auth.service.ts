@@ -2,7 +2,7 @@ import axios from "axios";
 import { removeEvents, removeUserEvents } from "./event.service";
 import { auth } from "./event.service";
 
-const API_URL = "/api/auth/";
+const API_URL = "http://localhost:8000/api/auth/";
 
 export const register = (email: string, password: string) => {
   return axios.post(API_URL + "signup", {

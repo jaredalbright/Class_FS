@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {authHeader, authHeader_LT} from './auth.header';
 
-const API_URL = "/api/events/";
+const API_URL = "http://localhost:8000/api/events/";
 
 // TODO ADD CHECK FOR AUTH EXP
 export const auth = (email : string) => {

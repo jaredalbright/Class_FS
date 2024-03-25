@@ -17,21 +17,15 @@ const time_conversion = (dateString, estTime) => {
         parseInt(estTimeParts[1])
       )
     );
+
+    //console.log(estDateTime)
     
     // the bookings are now 7 days and 22 hours
-    const oneWeekDateTime = new Date(estDateTime.getTime() - ((7 * 24) + 22) * 60 * 60 * 1000);
+    const utcTargetTime = new Date(estDateTime.getTime() - ((7 * 24) + 22 - 4) * 60 * 60 * 1000);
 
-    const estDay = oneWeekDateTime.day;
-    const estMonth = oneWeekDateTime.month;
-    const estYear = oneWeekDateTime.year;
+    //console.log(utcTargetTime)
 
-    const isDstObserved = (
-        (estMonth >= 3 && estMonth < 11) || // March to November (inclusive)
-        (estMonth === 2 && estDay >= (14 - (estYear % 7))) || // Second Sunday of March
-        (estMonth === 10 && estDay >= (7 - (estYear % 7))) // First Sunday of November
-    );
-
-    const utcTargetTime = new Date(oneWeekDateTime.getTime() + 60 * 60 * 1000 * (isDstObserved ? 4 : 5));
+    //const utcTargetTime = new Date(oneWeekDateTime.getTime() + 60 * 60 * 1000 * 4); //DST
 
     // Format UTC date and time using 24-hour format
     const target = new Intl.DateTimeFormat("en-US", {
@@ -41,12 +35,16 @@ const time_conversion = (dateString, estTime) => {
         timeZone: "UTC", // Ensure UTC formatting
       }).format(utcTargetTime);
 
+    //console.log(target)
+
     const utcTriggerTime = new Date(utcTargetTime.getTime() - 60 * 1000);
 
     // Format UTC date and time using 24-hour format
     const formattedUtcDate = new Intl.DateTimeFormat("en-US", {
       month: "2-digit",
       day: "2-digit",
+      hourCycle: "h23", // Use 24-hour clock format
+      timeZone: "UTC", // Ensure UTC formatting
     }).format(utcTriggerTime);
     const formattedUtcTime = new Intl.DateTimeFormat("en-US", {
       hour: "2-digit",
@@ -68,7 +66,7 @@ exports.create_cloud_schedule = async (event_id, date, time, member_id, email) =
     const client = new CloudSchedulerClient();
     const parent = client.locationPath(config.projectId, location);
     const job = {
-        name: parent + "/jobs/" + event_id + "_" + email.split("@")[0],
+        name: parent + "/jobs/" + event_id.replace(/\W/g, '') + "_" + email.split("@")[0],
         description: `Generated event for ${email}`,
         schedule: `${utcTime[1]} ${utcTime[0]} ${utcDate[1]} ${utcDate[0]} *`,
         timeZone: 'UTC', 
@@ -105,7 +103,7 @@ exports.delete_cloud_schedule = async (event_id, email) => {
   const location = config.functionRegion;
   const client = new CloudSchedulerClient();
   const parent = client.locationPath(config.projectId, location);
-  const name = parent + "/jobs/" + event_id + "_" + email.split("@")[0]
+  const name = parent + "/jobs/" + event_id.replace(/\W/g, '') + "_" + email.split("@")[0]
   const request = {
     name,
   }
